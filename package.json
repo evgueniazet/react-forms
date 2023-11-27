@@ -12,8 +12,13 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint"
+      "pre-commit": "lint-staged"
     }
+  },
+  "lint-staged": {
+    "*.(ts|tsx)": [
+      "npm run lint"
+    ]
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.7",
