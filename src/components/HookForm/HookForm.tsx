@@ -1,11 +1,11 @@
 import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import * as yup from 'yup';
 import { IFormValues } from '../../interfaces/IFormValues';
 import { useDispatch } from 'react-redux';
 import { setFormData } from '../../store/reducers';
 import { schema } from './schema';
+import styles from './HookForm.module.scss';
 
 const HookForm: React.FC = () => {
   const dispatch = useDispatch();
@@ -38,7 +38,6 @@ const HookForm: React.FC = () => {
 
   const onSubmit: SubmitHandler<IFormValues> = async (data) => {
     try {
-      // Вместо того, чтобы использовать результирующий объект, мы используем данные из хука useForm
       await schema.validate(data, { abortEarly: false });
       dispatch(setFormData(data));
       navigate('/');
@@ -51,72 +50,110 @@ const HookForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
-        <label htmlFor="name">Name:</label>
-        <input type="text" {...register('name')} />
-        {errors.name && <span>{errors.name as React.ReactNode}</span>}
-      </div>
-
-      <div>
-        <label htmlFor="age">Age:</label>
-        <input type="number" {...register('age')} />
-        {errors.age && <span>{errors.age as React.ReactNode}</span>}
-      </div>
-
-      <div>
-        <label htmlFor="email">Email:</label>
-        <input type="text" {...register('email')} />
-        {errors.email && <span>{errors.email as React.ReactNode}</span>}
-      </div>
-
-      <div>
-        <label htmlFor="password">Password:</label>
-        <input type="text" {...register('password')} />
-        {errors.password && <span>{errors.password as React.ReactNode}</span>}
-      </div>
-
-      <div>
-        <label htmlFor="passwordConfirm">Confirm Password:</label>
-        <input type="text" {...register('passwordConfirm')} />
-        {errors.passwordConfirm && (
-          <span>{errors.passwordConfirm as React.ReactNode}</span>
-        )}
-      </div>
-
-      <div>
-        <label>Gender:</label>
-        <div>
-          <label>
-            <input type="radio" {...register('gender')} value="male" />
-            Male
-          </label>
-          <label>
-            <input type="radio" {...register('gender')} value="female" />
-            Female
-          </label>
-          <label>
-            <input type="radio" {...register('gender')} value="other" />
-            Other
-          </label>
+    <div className={styles.wrapper}>
+      <h1 className={styles.title}>Registration</h1>
+      <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            {' '}
+            <label htmlFor="name">Name:</label>
+            <input type="text" {...register('name')} />
+          </div>
+          {errors.name && (
+            <span className={styles.error}>
+              {errors.name as React.ReactNode}
+            </span>
+          )}
         </div>
-        {errors.gender && <span>{errors.gender as React.ReactNode}</span>}
-      </div>
 
-      <button
-        type="submit"
-        disabled={
-          !!errors.name ||
-          !!errors.age ||
-          !!errors.email ||
-          !!errors.password ||
-          !!errors.passwordConfirm ||
-          !!errors.gender
-        }
-      >
-        Submit
-      </button>
-    </form>
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            {' '}
+            <label htmlFor="age">Age:</label>
+            <input type="number" {...register('age')} />
+          </div>
+          {errors.age && (
+            <span className={styles.error}>
+              {errors.age as React.ReactNode}
+            </span>
+          )}
+        </div>
+
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            <label htmlFor="email">Email:</label>
+            <input type="text" {...register('email')} />
+          </div>
+          {errors.email && (
+            <span className={styles.error}>
+              {errors.email as React.ReactNode}
+            </span>
+          )}
+        </div>
+
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            <label htmlFor="password">Password:</label>
+            <input type="text" {...register('password')} />
+          </div>
+          {errors.password && (
+            <span className={styles.error}>
+              {errors.password as React.ReactNode}
+            </span>
+          )}
+        </div>
+
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            <label htmlFor="passwordConfirm">Confirm Password:</label>
+            <input type="text" {...register('passwordConfirm')} />
+          </div>
+          {errors.passwordConfirm && (
+            <span className={styles.error}>
+              {errors.passwordConfirm as React.ReactNode}
+            </span>
+          )}
+        </div>
+
+        <div className={styles.formItemWrapper}>
+          <label>Gender:</label>
+          <div className={styles.genderList}>
+            <label className={styles.genderItem}>
+              <input type="radio" {...register('gender')} value="male" />
+              Male
+            </label>
+            <label className={styles.genderItem}>
+              <input type="radio" {...register('gender')} value="female" />
+              Female
+            </label>
+            <label className={styles.genderItem}>
+              <input type="radio" {...register('gender')} value="other" />
+              Other
+            </label>
+          </div>
+          {errors.gender && (
+            <span className={styles.error}>
+              {errors.gender as React.ReactNode}
+            </span>
+          )}
+        </div>
+
+        <button
+          className={styles.button}
+          type="submit"
+          disabled={
+            !!errors.name ||
+            !!errors.age ||
+            !!errors.email ||
+            !!errors.password ||
+            !!errors.passwordConfirm ||
+            !!errors.gender
+          }
+        >
+          Submit
+        </button>
+      </form>
+    </div>
   );
 };
 
