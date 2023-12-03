@@ -1,6 +1,11 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { schema } from '../../utils/schema';
-import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  setFormData,
+  setFormImage,
+  selectFormData,
+} from '../../store/reducers/formReducer';
 import styles from './UncontrolledForm.module.scss';
 
 interface FormErrors {
@@ -23,17 +28,19 @@ interface ValidationErrors {
 }
 
 const UncontrolledForm: React.FC = () => {
-  const [formData, setFormData] = useState({
+  const dispatch = useDispatch();
+
+  const formData = useSelector(selectFormData) || {
     name: '',
-    age: '',
+    age: 0,
     email: '',
     password: '',
     passwordConfirm: '',
     gender: '',
     acceptTerms: false,
-    picture: null as File | null,
+    picture: undefined as File | undefined,
     country: '',
-  });
+  };
 
   const [errors, setErrors] = useState<FormErrors>({
     name: '',
@@ -44,8 +51,6 @@ const UncontrolledForm: React.FC = () => {
     gender: '',
     acceptTerms: '',
   });
-
-  const navigate = useNavigate();
 
   const handleChange = async (
     e: React.ChangeEvent<
@@ -73,13 +78,15 @@ const UncontrolledForm: React.FC = () => {
       }
     }
 
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    dispatch(setFormData({ ...formData, [name]: value }));
   };
 
   const handlePictureChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormData((prevData) => ({ ...prevData, picture: file }));
+      dispatch(
+        setFormData({ ...formData, picture: file, age: Number(formData.age) })
+      );
     }
   };
 
@@ -87,9 +94,15 @@ const UncontrolledForm: React.FC = () => {
     e.preventDefault();
 
     try {
-      await schema.validate(formData, { abortEarly: false });
+      const formDataForValidation = { ...formData, age: Number(formData.age) };
+      await schema.validate(formDataForValidation, { abortEarly: false });
       console.log('Form submitted:', formData);
-      navigate('/');
+      dispatch(setFormData(formData));
+      if (formData.picture) {
+        dispatch(
+          setFormImage({ image: URL.createObjectURL(formData.picture) })
+        );
+      }
     } catch (error) {
       const validationErrors = error as ValidationErrors;
       if (validationErrors.inner && validationErrors.inner.length > 0) {

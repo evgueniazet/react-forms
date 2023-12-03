@@ -1,5 +1,10 @@
 import * as yup from 'yup';
 
+interface FileData {
+  size: number;
+  type: string;
+}
+
 export const schema = yup.object({
   name: yup
     .string()
@@ -36,4 +41,23 @@ export const schema = yup.object({
       'Accept Terms & Conditions is required',
       (value) => value === true
     ),
+  // picture: yup
+  // .mixed()
+  // .test(
+  //   'fileSize',
+  //   'File size is too large',
+  //   (value: FileData | undefined) => {
+  //     return value === undefined || (value.size <= 5 * 1024 * 1024);
+  //   }
+  // )
+  // .test(
+  //   'fileType',
+  //   'Invalid file type. Only PNG and JPEG are allowed',
+  //   (value: FileData | undefined) => {
+  //     return (
+  //       value === undefined ||
+  //       ['image/png', 'image/jpeg'].includes(value.type.split('/')[1])
+  //     );
+  //   }
+  // ),
 });

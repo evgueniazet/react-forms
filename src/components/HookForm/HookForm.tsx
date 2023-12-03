@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm, SubmitHandler, UseFormSetValue } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { IFormValues } from '../../interfaces/IFormValues';
 import { useDispatch, useSelector } from 'react-redux';
@@ -76,18 +76,24 @@ const HookForm: React.FC = () => {
     }
   };
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    console.log('1');
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.currentTarget.files?.[0];
 
     if (file) {
       const reader = new FileReader();
-      console.log('reader', reader);
 
       reader.onloadend = () => {
-        const base64Image = reader.result?.toString() || '';
-        dispatch(setFormImage({ image: base64Image }));
+        if (reader.error) {
+          console.error('Error reading the file:', reader.error);
+        } else {
+          const base64Image = reader.result?.toString() || '';
+          setValue('picture', file, { shouldValidate: true });
+          dispatch(setFormImage({ image: base64Image }));
+        }
       };
+
       reader.readAsDataURL(file);
     }
   };
@@ -202,7 +208,6 @@ const HookForm: React.FC = () => {
               type="file"
               {...register('picture')}
               onChange={(e) => {
-                setValue('picture', e.target.files?.[0]);
                 handleImageChange(e);
               }}
             />
