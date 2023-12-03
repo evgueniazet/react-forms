@@ -1,6 +1,6 @@
 export interface IFormValues {
   name: string;
-  age: number;
+  age: string;
   email: string;
   password: string;
   passwordConfirm: string;

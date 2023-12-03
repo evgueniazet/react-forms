@@ -1,10 +1,12 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { schema } from '../../utils/schema';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
   setFormData,
   setFormImage,
   selectFormData,
+  selectCountries,
 } from '../../store/reducers/formReducer';
 import styles from './UncontrolledForm.module.scss';
 
@@ -13,9 +15,8 @@ interface FormErrors {
   age: string;
   email: string;
   password: string;
-  passwordConfirm: string;
   gender: string;
-  acceptTerms: string;
+  country: string;
 }
 
 interface ValidationError {
@@ -29,16 +30,17 @@ interface ValidationErrors {
 
 const UncontrolledForm: React.FC = () => {
   const dispatch = useDispatch();
+  const countries = useSelector(selectCountries);
+  const navigate = useNavigate();
 
   const formData = useSelector(selectFormData) || {
     name: '',
-    age: 0,
+    age: '',
     email: '',
     password: '',
     passwordConfirm: '',
     gender: '',
     acceptTerms: false,
-    picture: undefined as File | undefined,
     country: '',
   };
 
@@ -47,10 +49,32 @@ const UncontrolledForm: React.FC = () => {
     age: '',
     email: '',
     password: '',
-    passwordConfirm: '',
     gender: '',
-    acceptTerms: '',
+    country: '',
   });
+
+  console.log('errors', errors);
+
+  const handleCountryChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    try {
+      await schema.validateAt(name, { [name]: value });
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name as keyof FormErrors]: '',
+      }));
+      dispatch(setFormData({ ...formData, [name]: value }));
+    } catch (error) {
+      const validationError = error as ValidationError;
+      if (validationError instanceof Error) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [name]: validationError.message,
+        }));
+      }
+    }
+  };
 
   const handleChange = async (
     e: React.ChangeEvent<
@@ -62,7 +86,6 @@ const UncontrolledForm: React.FC = () => {
     try {
       const inputValue =
         type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
-
       await schema.validateAt(name, { [name]: inputValue });
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -70,6 +93,7 @@ const UncontrolledForm: React.FC = () => {
       }));
     } catch (error) {
       const validationError = error as ValidationError;
+
       if (validationError instanceof Error) {
         setErrors((prevErrors) => ({
           ...prevErrors,
@@ -81,28 +105,19 @@ const UncontrolledForm: React.FC = () => {
     dispatch(setFormData({ ...formData, [name]: value }));
   };
 
-  const handlePictureChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      dispatch(
-        setFormData({ ...formData, picture: file, age: Number(formData.age) })
-      );
-    }
-  };
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
-      const formDataForValidation = { ...formData, age: Number(formData.age) };
+      const formDataForValidation = { ...formData };
       await schema.validate(formDataForValidation, { abortEarly: false });
-      console.log('Form submitted:', formData);
       dispatch(setFormData(formData));
       if (formData.picture) {
         dispatch(
           setFormImage({ image: URL.createObjectURL(formData.picture) })
         );
       }
+      navigate('/');
     } catch (error) {
       const validationErrors = error as ValidationErrors;
       if (validationErrors.inner && validationErrors.inner.length > 0) {
@@ -137,7 +152,7 @@ const UncontrolledForm: React.FC = () => {
             />
           </div>
 
-          {errors.name && <p>{errors.name}</p>}
+          {errors.name && <span className={styles.error}>{errors.name}</span>}
         </div>
 
         <div className={styles.formItemWrapper}>
@@ -151,7 +166,7 @@ const UncontrolledForm: React.FC = () => {
             />
           </div>
 
-          {errors.age && <p>{errors.age}</p>}
+          {errors.age && <span className={styles.error}>{errors.age}</span>}
         </div>
 
         <div className={styles.formItemWrapper}>
@@ -165,7 +180,7 @@ const UncontrolledForm: React.FC = () => {
             />
           </div>
 
-          {errors.email && <p>{errors.email}</p>}
+          {errors.email && <span className={styles.error}>{errors.email}</span>}
         </div>
 
         <div className={styles.formItemWrapper}>
@@ -179,57 +194,73 @@ const UncontrolledForm: React.FC = () => {
             />
           </div>
 
-          {errors.password && <p>{errors.password}</p>}
-        </div>
-
-        <div className={styles.formItemWrapper}>
-          <div className={styles.formItem}>
-            <label htmlFor="passwordConfirm">Confirm Password:</label>
-            <input
-              type="password"
-              name="passwordConfirm"
-              value={formData.passwordConfirm}
-              onChange={handleChange}
-            />
-          </div>
-
-          {errors.passwordConfirm && <p>{errors.passwordConfirm}</p>}
+          {errors.password && (
+            <span className={styles.error}>{errors.password}</span>
+          )}
         </div>
 
         <div className={styles.formItemWrapper}>
           <label>Gender:</label>
-        </div>
-
-        <div className={styles.formItemWrapper}>
-          <div className={styles.formItem}>
-            <label>
+          <div className={styles.genderList}>
+            <label className={styles.genderItem}>
               <input
-                type="checkbox"
-                name="acceptTerms"
-                checked={formData.acceptTerms}
+                type="radio"
+                name="gender"
+                value="male"
+                checked={formData.gender === 'male'}
                 onChange={handleChange}
               />
-              Accept Terms & Conditions
+              Male
+            </label>
+            <label className={styles.genderItem}>
+              <input
+                type="radio"
+                name="gender"
+                value="female"
+                checked={formData.gender === 'female'}
+                onChange={handleChange}
+              />
+              Female
+            </label>
+            <label className={styles.genderItem}>
+              <input
+                type="radio"
+                name="gender"
+                value="other"
+                checked={formData.gender === 'other'}
+                onChange={handleChange}
+              />
+              Other
             </label>
           </div>
-
-          {errors.acceptTerms && <p>{errors.acceptTerms}</p>}
+          {errors.gender && (
+            <span className={styles.error}>
+              {errors.gender as React.ReactNode}
+            </span>
+          )}
         </div>
 
         <div className={styles.formItemWrapper}>
           <div className={styles.formItem}>
-            <label htmlFor="picture">Upload Picture:</label>
+            <label htmlFor="country">Select Country:</label>
             <input
-              type="file"
-              name="picture"
-              accept=".png, .jpg, .jpeg"
-              onChange={handlePictureChange}
+              type="text"
+              id="country"
+              name="country"
+              value={formData.country}
+              onChange={handleCountryChange}
+              list="countriesList"
             />
           </div>
-        </div>
 
-        <div className={styles.formItemWrapper}>
-          <label htmlFor="country">Select Country:</label>
+          <datalist id="countriesList">
+            {countries.map((country) => (
+              <option key={country.id} value={country.name} />
+            ))}
+          </datalist>
+          {errors.country && (
+            <span className={styles.error}>{errors.country}</span>
+          )}
         </div>
 
         <button

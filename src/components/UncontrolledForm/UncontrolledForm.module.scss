@@ -22,10 +22,11 @@
 .formItem {
     display: flex;
     justify-content: space-between;
+    margin-top: 10px;
 }
 
 .formItemWrapper {
-    height: 50px;
+    height: 75px;
 }
 
 .genderList {
@@ -40,6 +41,7 @@
 
 .error {
     color: $red;
+    font-size: 14px;
 }
 
 .button {

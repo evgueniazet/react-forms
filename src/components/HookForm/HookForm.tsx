@@ -7,6 +7,7 @@ import {
   setFormData,
   setFormImage,
   selectFormImage,
+  selectCountries,
 } from '../../store/reducers/formReducer';
 import { schema } from '../../utils/schema';
 import styles from './HookForm.module.scss';
@@ -24,11 +25,11 @@ const HookForm: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const formImage = useSelector(selectFormImage);
+  const countries = useSelector(selectCountries);
 
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<IFormValues>({
     resolver: async (data: IFormValues) => {
@@ -73,28 +74,6 @@ const HookForm: React.FC = () => {
           });
         }
       }
-    }
-  };
-
-  const handleImageChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.currentTarget.files?.[0];
-
-    if (file) {
-      const reader = new FileReader();
-
-      reader.onloadend = () => {
-        if (reader.error) {
-          console.error('Error reading the file:', reader.error);
-        } else {
-          const base64Image = reader.result?.toString() || '';
-          setValue('picture', file, { shouldValidate: true });
-          dispatch(setFormImage({ image: base64Image }));
-        }
-      };
-
-      reader.readAsDataURL(file);
     }
   };
 
@@ -203,18 +182,22 @@ const HookForm: React.FC = () => {
 
         <div className={styles.formItemWrapper}>
           <div className={styles.formItem}>
-            <label htmlFor="picture">Upload Picture:</label>
+            <label htmlFor="country">Select Country:</label>
             <input
-              type="file"
-              {...register('picture')}
-              onChange={(e) => {
-                handleImageChange(e);
-              }}
+              type="text"
+              id="country"
+              list="countriesList"
+              {...register('country')}
             />
+            <datalist id="countriesList">
+              {countries.map((country) => (
+                <option key={country.id} value={country.name} />
+              ))}
+            </datalist>
           </div>
-          {errors.picture && (
+          {errors.country && (
             <span className={styles.error}>
-              {errors.picture as React.ReactNode}
+              {errors.country as React.ReactNode}
             </span>
           )}
         </div>
@@ -228,7 +211,8 @@ const HookForm: React.FC = () => {
             !!errors.email ||
             !!errors.password ||
             !!errors.passwordConfirm ||
-            !!errors.gender
+            !!errors.gender ||
+            !!errors.country
           }
         >
           Submit
