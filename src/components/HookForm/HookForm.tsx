@@ -1,38 +1,59 @@
 import React from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, UseFormSetValue } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { IFormValues } from '../../interfaces/IFormValues';
-import { useDispatch } from 'react-redux';
-import { setFormData } from '../../store/reducers';
-import { schema } from './schema';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  setFormData,
+  setFormImage,
+  selectFormImage,
+} from '../../store/reducers/formReducer';
+import { schema } from '../../utils/schema';
 import styles from './HookForm.module.scss';
+
+interface IValidationError {
+  path?: keyof IFormValues;
+  message: string;
+}
+
+interface IValidationErrors {
+  inner: IValidationError[];
+}
 
 const HookForm: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const formImage = useSelector(selectFormImage);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<IFormValues>({
-    resolver: (data) => {
-      return schema.validate(data, { abortEarly: false }).then(
-        () => ({
+    resolver: async (data: IFormValues) => {
+      try {
+        await schema.validate(data, { abortEarly: false });
+        return {
           values: data,
           errors: {},
-        }),
-        (validationErrors) => ({
-          values: {},
+        };
+      } catch (error) {
+        const validationErrors = error as IValidationErrors;
+        return {
+          values: {} as IFormValues,
           errors: validationErrors.inner.reduce(
-            (acc: Record<keyof IFormValues, string>, error: any) => {
+            (
+              acc: Record<keyof IFormValues, string>,
+              error: IValidationError
+            ) => {
               acc[error.path as keyof IFormValues] = error.message;
               return acc;
             },
             {} as Record<keyof IFormValues, string>
           ),
-        })
-      );
+        };
+      }
     },
   });
 
@@ -40,12 +61,34 @@ const HookForm: React.FC = () => {
     try {
       await schema.validate(data, { abortEarly: false });
       dispatch(setFormData(data));
+      dispatch(setFormImage({ image: formImage }));
       navigate('/');
-    } catch (validationErrors: any) {
-      console.error('Validation errors:', validationErrors);
-      validationErrors.inner.forEach((error: any) => {
-        console.error(`${error.path}: ${error.message}`);
-      });
+    } catch (validationErrors: IValidationErrors | unknown) {
+      if (validationErrors) {
+        console.error('Validation errors:', validationErrors);
+        const errors = (validationErrors as IValidationErrors)?.inner;
+        if (errors) {
+          errors.forEach((error: IValidationError) => {
+            console.error(`${error.path}: ${error.message}`);
+          });
+        }
+      }
+    }
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    console.log('1');
+
+    if (file) {
+      const reader = new FileReader();
+      console.log('reader', reader);
+
+      reader.onloadend = () => {
+        const base64Image = reader.result?.toString() || '';
+        dispatch(setFormImage({ image: base64Image }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -94,7 +137,7 @@ const HookForm: React.FC = () => {
         <div className={styles.formItemWrapper}>
           <div className={styles.formItem}>
             <label htmlFor="password">Password:</label>
-            <input type="text" {...register('password')} />
+            <input type="password" {...register('password')} />
           </div>
           {errors.password && (
             <span className={styles.error}>
@@ -106,7 +149,7 @@ const HookForm: React.FC = () => {
         <div className={styles.formItemWrapper}>
           <div className={styles.formItem}>
             <label htmlFor="passwordConfirm">Confirm Password:</label>
-            <input type="text" {...register('passwordConfirm')} />
+            <input type="password" {...register('passwordConfirm')} />
           </div>
           {errors.passwordConfirm && (
             <span className={styles.error}>
@@ -134,6 +177,39 @@ const HookForm: React.FC = () => {
           {errors.gender && (
             <span className={styles.error}>
               {errors.gender as React.ReactNode}
+            </span>
+          )}
+        </div>
+
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            <label htmlFor="acceptTerms">
+              <input type="checkbox" {...register('acceptTerms')} />
+              Accept Terms & Conditions
+            </label>
+          </div>
+          {errors.acceptTerms && (
+            <span className={styles.error}>
+              {errors.acceptTerms as React.ReactNode}
+            </span>
+          )}
+        </div>
+
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            <label htmlFor="picture">Upload Picture:</label>
+            <input
+              type="file"
+              {...register('picture')}
+              onChange={(e) => {
+                setValue('picture', e.target.files?.[0]);
+                handleImageChange(e);
+              }}
+            />
+          </div>
+          {errors.picture && (
+            <span className={styles.error}>
+              {errors.picture as React.ReactNode}
             </span>
           )}
         </div>

@@ -4,9 +4,13 @@ export interface IFormValues {
   email: string;
   password: string;
   passwordConfirm: string;
-  gender: 'male' | 'female' | 'other';
+  gender: string;
+  acceptTerms: boolean;
+  picture?: File;
+  country: string; 
 }
 
 export interface IFormState {
   formData: IFormValues | null;
+  formImage: string | null,
 }
