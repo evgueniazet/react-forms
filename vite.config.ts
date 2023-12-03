@@ -1,0 +1,14 @@
+import reactRefresh from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [reactRefresh()],
+  css: {
+    modules: {},
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import "./src/styles/variables.scss";`,
+      },
+    },
+  },
+});
