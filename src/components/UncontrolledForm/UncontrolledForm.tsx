@@ -1,6 +1,7 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { schema } from '../../utils/schema';
 import { useNavigate } from 'react-router-dom';
+import styles from './UncontrolledForm.module.scss';
 
 interface FormErrors {
   name: string;
@@ -109,97 +110,124 @@ const UncontrolledForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="name">Name:</label>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-        />
-        {errors.name && <p>{errors.name}</p>}
-      </div>
+    <div className={styles.wrapper}>
+      <h1 className={styles.title}>Registration</h1>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            <label htmlFor="name">Name:</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+            />
+          </div>
 
-      <div>
-        <label htmlFor="age">Age:</label>
-        <input
-          type="text"
-          name="age"
-          value={formData.age}
-          onChange={handleChange}
-        />
-        {errors.age && <p>{errors.age}</p>}
-      </div>
+          {errors.name && <p>{errors.name}</p>}
+        </div>
 
-      <div>
-        <label htmlFor="email">Email:</label>
-        <input
-          type="text"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        {errors.email && <p>{errors.email}</p>}
-      </div>
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            <label htmlFor="age">Age:</label>
+            <input
+              type="text"
+              name="age"
+              value={formData.age}
+              onChange={handleChange}
+            />
+          </div>
 
-      <div>
-        <label htmlFor="password">Password:</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-        />
-        {errors.password && <p>{errors.password}</p>}
-      </div>
+          {errors.age && <p>{errors.age}</p>}
+        </div>
 
-      <div>
-        <label htmlFor="passwordConfirm">Confirm Password:</label>
-        <input
-          type="password"
-          name="passwordConfirm"
-          value={formData.passwordConfirm}
-          onChange={handleChange}
-        />
-        {errors.passwordConfirm && <p>{errors.passwordConfirm}</p>}
-      </div>
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            <label htmlFor="email">Email:</label>
+            <input
+              type="text"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+          </div>
 
-      <div>
-        <label>Gender:</label>
-      </div>
+          {errors.email && <p>{errors.email}</p>}
+        </div>
 
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="acceptTerms"
-            checked={formData.acceptTerms}
-            onChange={handleChange}
-          />
-          Accept Terms & Conditions
-        </label>
-        {errors.acceptTerms && <p>{errors.acceptTerms}</p>}
-      </div>
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            <label htmlFor="password">Password:</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+            />
+          </div>
 
-      <div>
-        <label htmlFor="picture">Upload Picture:</label>
-        <input
-          type="file"
-          name="picture"
-          accept=".png, .jpg, .jpeg"
-          onChange={handlePictureChange}
-        />
-      </div>
+          {errors.password && <p>{errors.password}</p>}
+        </div>
 
-      <div>
-        <label htmlFor="country">Select Country:</label>
-      </div>
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            <label htmlFor="passwordConfirm">Confirm Password:</label>
+            <input
+              type="password"
+              name="passwordConfirm"
+              value={formData.passwordConfirm}
+              onChange={handleChange}
+            />
+          </div>
 
-      <button type="submit" disabled={Object.values(errors).some(Boolean)}>
-        Submit
-      </button>
-    </form>
+          {errors.passwordConfirm && <p>{errors.passwordConfirm}</p>}
+        </div>
+
+        <div className={styles.formItemWrapper}>
+          <label>Gender:</label>
+        </div>
+
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            <label>
+              <input
+                type="checkbox"
+                name="acceptTerms"
+                checked={formData.acceptTerms}
+                onChange={handleChange}
+              />
+              Accept Terms & Conditions
+            </label>
+          </div>
+
+          {errors.acceptTerms && <p>{errors.acceptTerms}</p>}
+        </div>
+
+        <div className={styles.formItemWrapper}>
+          <div className={styles.formItem}>
+            <label htmlFor="picture">Upload Picture:</label>
+            <input
+              type="file"
+              name="picture"
+              accept=".png, .jpg, .jpeg"
+              onChange={handlePictureChange}
+            />
+          </div>
+        </div>
+
+        <div className={styles.formItemWrapper}>
+          <label htmlFor="country">Select Country:</label>
+        </div>
+
+        <button
+          className={styles.button}
+          type="submit"
+          disabled={Object.values(errors).some(Boolean)}
+        >
+          Submit
+        </button>
+      </form>
+    </div>
   );
 };
 
